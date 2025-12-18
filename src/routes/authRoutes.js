@@ -1,0 +1,149 @@
+const express = require("express"); // importing the express module from the node modules and returns the function
+const router = express.Router();
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const { v4: uuidv4 } = require("uuid"); // loading v4 function from uuid module , that genarates a random unique Id
+const mysql = require("../database/db");
+const auth = require("../middleware/auth");
+
+const JWT_SECRET = "racinglap";
+
+// REGISTER
+router.post("/register", async (req, res) => {
+  try {
+    const { userName, email, password } = req.body;
+    //  Check empty fields
+    if (!userName || !email || !password) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    // Trim check
+    if (
+      userName.trim() === "" ||
+      email.trim() === "" ||
+      password.trim() === ""
+    ) {
+      return res.status(400).json({ error: "Fields cannot be empty" });
+    }
+
+    //  Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+
+    // Validate password strength
+    if (password.length < 6) {
+      return res
+        .status(400)
+        .json({ error: "Password must be at least 6 characters long" });
+    }
+
+    //  Check if user already exists
+    const [existing] = await mysql.query(
+      "SELECT * FROM users WHERE email = ?",
+      [email]
+    );
+
+    if (existing.length > 0) {
+      return res.status(400).json({ error: "Email already exists" });
+    }
+
+    const hash = await bcrypt.hash(password, 10); // hashes the password , adds salt(random string) added to password before hashing it.
+    // it prevents the two users having the same password. (password+random salt) ->different hash every time
+
+    const userId = uuidv4(); // unique id genarates
+
+    await mysql.query(
+      "INSERT INTO users (id, userName, email, password) VALUES (?,?,?,?)",
+      [userId, userName, email, hash]
+    );
+
+    res.json({ message: "User registered successfully" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: "Register failed" });
+  }
+});
+
+// LOGIN
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    // Validate empty inputs
+    if (!email || !password || email.trim() === "" || password.trim() === "") {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
+
+    // Check basic email format 
+    if (!email.includes("@")) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+
+    const [rows] = await mysql.query("SELECT * FROM users WHERE email = ?", [
+      email,
+    ]); // array of objects
+
+    //rows --> returns a array with 2 elements
+    //rows[0] -> data from the query(rows)
+    //rows[1] -> field info(metadata about columns)
+
+    if (!rows[0]) return res.status(404).json({ error: "User not found" });
+
+    const valid = await bcrypt.compare(password, rows[0].password);
+
+    if (!valid) return res.status(400).json({ error: "Invalid password" });
+
+    const token = jwt.sign(
+      { userId: rows[0].id, userName: rows[0].userName, email },
+      JWT_SECRET,
+      {
+        expiresIn: "1d",
+      }
+    );
+
+    res.cookie("token", token, {
+      httpOnly: true, // cookies cannot be accessed by js(browser) - protecting from XSS attacks
+      secure: false, // cookie will be sent on HTTP or HTTPS
+      sameSite: "lax", // cookies will not be send to the server when coming from different server
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+    return res.json({ message: "Login success", token });
+  } catch (err) {
+    console.log(err);
+    res
+      .status(500)
+      .json({ error: "Login failed email and password are mandatory" });
+  }
+});
+
+router.post("/logout", auth, async (req, res) => {
+  try {
+    const userName = req.user.userName;
+
+    //  End any active session
+    await mysql.query(
+      `UPDATE session
+       SET endTime = NOW(),
+           duration = TIMEDIFF(NOW(), startTime)
+       WHERE userName = ?
+         AND endTime IS NULL`,
+      [userName]
+    );
+
+    //  Clear cookie
+    res.clearCookie("token", {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false,
+      path: "/",
+    });
+
+    return res.json({ message: "Logged out successfully" });
+  } catch (err) {
+    console.error("LOGOUT ERROR:", err);
+    return res.status(500).json({ error: "Logout failed" });
+  }
+});
+
+module.exports = router;

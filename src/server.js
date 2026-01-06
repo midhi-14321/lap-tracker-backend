@@ -13,17 +13,19 @@ const getsessionDetails = require("./routes/getsessionDetails");
 const userFilters = require("./routes/userFilters");
 const authRoutes = require("./routes/authRoutes");
 const deleteRoutes = require("./routes/deleteRoutes");
+const adminOnly = require("./routes/admin");
 // app.use("/api/session", require("./routes/sessionRoutes")); // mounting all routes inside sesionRoutes(BASE_URL+path)
 
 app.get("/", (req, res) => {
- 
   res.send("Lap tracker Api is running..");
 });
 app.use("/api", getsessionDetails);
 app.use("/api/filter", userFilters);
 app.use("/api/auth", authRoutes);
 app.use("/api", deleteRoutes);
-app.use('/api/session',sessionRoutes)
+app.use("/api/session", sessionRoutes);
+app.use("/api/admin", adminOnly);
+
 app.listen(2000, () => {
   // start server
   // tells to the express app to listen for incoming requests and server is running on the 2000 port number

@@ -153,22 +153,7 @@ router.get("/laps/user", auth, async (req, res) => {
 });
 
 //  4) GET summary (session count, total laps, avg duration)
-// router.get("/stats", auth, async (_, res) => {
-//   try {
-//     const [stats] = await mysql.query(`
-//       SELECT
-//         (SELECT COUNT(*) FROM session) AS totalSessions,
-//         (SELECT COUNT(*) FROM lap) AS totalLaps,
-//         (SELECT AVG(duration) FROM lap) AS avgLapDuration
-//     `);
 
-//     res.json(stats[0]);
-//   } catch (error) {
-//     res.status(500).json({ message: "Server error" });
-//   }
-// });
-
-// 5) get the loged-in-user stats like(no of session, laps ,avg duration)
 router.get("/user/stats", auth, async (req, res) => {
   try {
     const userName = req.user.userName;
@@ -177,22 +162,28 @@ router.get("/user/stats", auth, async (req, res) => {
       `
       SELECT
         (SELECT COUNT(*) 
-         FROM session 
+         FROM \`session\`
          WHERE userName = ?) AS totalSessions,
 
         (SELECT COUNT(*) 
          FROM lap l
-         JOIN session s ON s.id = l.sessionId
+         JOIN \`session\` s ON s.id = l.sessionId
          WHERE s.userName = ?) AS totalLaps,
 
-      
-        (
-          SELECT IFNULL(AVG(l.duration), 0)
+         (
+          SELECT IFNULL(
+            AVG(
+              TIME_TO_SEC(l.duration)
+            ), 0
+          )
           FROM lap l
-          JOIN session s ON s.id = l.sessionId
+          JOIN \`session\` s ON s.id = l.sessionId
           WHERE s.userName = ?
             AND l.duration IS NOT NULL
+            AND l.duration != ''
         ) AS avgLapDuration
+
+        
       `,
       [userName, userName, userName]
     );

@@ -76,7 +76,7 @@ router.delete("/lap/delete/:lapId", auth, async (req, res) => {
   }
 });
 
-// delete all sessions
+
 
 // delete all sessions of logged-in user
 router.delete("/session/delete-all", auth, async (req, res) => {
@@ -96,16 +96,10 @@ router.delete("/session/delete-all", auth, async (req, res) => {
     const sessionIds = sessions.map((s) => s.id);
 
     // delete laps first
-    await mysql.query(
-      "DELETE FROM lap WHERE sessionId IN (?)",
-      [sessionIds]
-    );
+    await mysql.query("DELETE FROM lap WHERE sessionId IN (?)", [sessionIds]);
 
     // delete sessions
-    await mysql.query(
-      "DELETE FROM session WHERE id IN (?)",
-      [sessionIds]
-    );
+    await mysql.query("DELETE FROM session WHERE id IN (?)", [sessionIds]);
 
     res.json({ message: "All sessions deleted successfully" });
   } catch (err) {
@@ -116,5 +110,30 @@ router.delete("/session/delete-all", auth, async (req, res) => {
 
 
 
+// DELETE all laps of logged-in user
+router.delete("/lap/delete-all", auth, async (req, res) => {
+  try {
+    const userName = req.user.userName; // from JWT
+
+    // Delete laps that belong to user's sessions
+    const [result] = await mysql.query(
+      `
+      DELETE l
+      FROM lap l
+      JOIN session s ON l.sessionId = s.id
+      WHERE s.userName = ?
+      `,
+      [userName]
+    );
+
+    res.json({
+      message: "All laps deleted successfully",
+      deletedCount: result.affectedRows,
+    });
+  } catch (err) {
+    console.error("DELETE ALL LAPS ERROR:", err);
+    res.status(500).json({ error: "Server error while deleting laps" });
+  }
+});
 
 module.exports = router;

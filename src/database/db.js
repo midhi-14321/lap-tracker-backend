@@ -1,26 +1,3 @@
-// const mysql = require("mysql2/promise");
-
-// const db = mysql.createPool({
-//   host: "localhost",
-//   user: "root",
-//   password: "Midhi@2002",
-//   database: "racinglap",
-// //   waitForConnections: true,
-// //   connectionLimit: 10,
-// //   queueLimit: 0,
-// });
-
-// // db.connect((err) => {
-// //   if (err) {
-// //     console.log("DB Connection Failed:", err);
-// //   } else {
-// //     console.log("MySQL Connected ");
-// //   }
-// // });
-
-// module.exports = db
-
-// db.js
 const mysql = require("mysql2/promise"); // this loads mysql2/promise library with async/await support
 
 const db = mysql.createPool({

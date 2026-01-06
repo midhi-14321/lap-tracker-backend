@@ -139,7 +139,21 @@ router.post("/lap/start", auth, async (req, res) => {
         .json({ error: "Cannot start lap: session already ended" });
     }
 
-    // 3. Insert new lap
+    //  3. CHECK IF ACTIVE LAP ALREADY EXISTS (FIX)
+    const [activeLap] = await mysql.query(
+      "SELECT lapId, lapStart FROM lap WHERE sessionId = ? AND lapEnd IS NULL",
+      [sessionId]
+    );
+
+    if (activeLap.length > 0) {
+      return res.status(400).json({
+        error: "A lap is already active",
+        lapId: activeLap[0].lapId,
+        lapStart: activeLap[0].lapStart,
+      });
+    }
+
+    // 4. Insert new lap
     const lapId = uuidv4();
     const lapStart = new Date();
 
@@ -190,7 +204,8 @@ router.post("/lap/end", auth, async (req, res) => {
 
     // 4. Calculate duration
     const endTime = new Date();
-    const duration = endTime - lap.lapStart;
+    const duration = formatDuration(endTime - lap.lapStart);
+    // const duration = formatDuration(endTime - laps[0].startTime);
 
     // 5. Update lap
     await mysql.query("UPDATE lap SET lapEnd=?, duration=? WHERE lapId=?", [
@@ -205,37 +220,6 @@ router.post("/lap/end", auth, async (req, res) => {
     res.status(500).json({ error: "Something went wrong" });
   }
 });
-
-// router.get("/active", auth, async (req, res) => {
-//   try {
-//     const userName = req.user.userName;
-
-//     const [rows] = await mysql.query(
-//       `SELECT id, startTime
-//        FROM session
-//        WHERE userName = ?
-//          AND endTime IS NULL
-//        ORDER BY startTime DESC
-//        LIMIT 1`,
-//       [userName]
-//     );
-
-//     if (!rows[0]) {
-//       return res.json({ active: false });
-//     }
-
-//     return res.json({
-//       active: true,
-//       session: {
-//         sessionId: rows[0].id,
-//         startTime: rows[0].startTime,
-//       },
-//     });
-//   } catch (err) {
-//     console.error("ACTIVE SESSION ERROR:", err);
-//     return res.status(500).json({ error: "Something went wrong" });
-//   }
-// });
 
 router.get("/active", auth, async (req, res) => {
   console.log("ACTIVE SESSION HIT");

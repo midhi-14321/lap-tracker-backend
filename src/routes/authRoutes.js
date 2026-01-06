@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const { v4: uuidv4 } = require("uuid"); // loading v4 function from uuid module , that genarates a random unique Id
 const mysql = require("../database/db");
 const auth = require("../middleware/auth");
+const isAdmin = require("../middleware/admin-only");
 
 const JWT_SECRET = "racinglap";
 
@@ -75,7 +76,7 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Email and password are required" });
     }
 
-    // Check basic email format 
+    // Check basic email format
     if (!email.includes("@")) {
       return res.status(400).json({ error: "Invalid email format" });
     }
@@ -95,20 +96,31 @@ router.post("/login", async (req, res) => {
     if (!valid) return res.status(400).json({ error: "Invalid password" });
 
     const token = jwt.sign(
-      { userId: rows[0].id, userName: rows[0].userName, email },
-      JWT_SECRET,
       {
-        expiresIn: "1d",
-      }
+        userId: rows[0].id,
+        userName: rows[0].userName,
+        email,
+        role: rows[0].role,
+      },
+      JWT_SECRET
     );
 
     res.cookie("token", token, {
       httpOnly: true, // cookies cannot be accessed by js(browser) - protecting from XSS attacks
       secure: false, // cookie will be sent on HTTP or HTTPS
       sameSite: "lax", // cookies will not be send to the server when coming from different server
-      maxAge: 24 * 60 * 60 * 1000,
+      // maxAge: 24 * 60 * 60 * 1000,
     });
-    return res.json({ message: "Login success", token });
+    return res.json({
+      message: "Login success",
+      token,
+      user: {
+        userId: rows[0].userId,
+        userName: rows[0].userName,
+        email,
+        role: rows[0].role,
+      },
+    });
   } catch (err) {
     console.log(err);
     res
@@ -116,6 +128,8 @@ router.post("/login", async (req, res) => {
       .json({ error: "Login failed email and password are mandatory" });
   }
 });
+
+//LOGOUT
 
 router.post("/logout", auth, async (req, res) => {
   try {
@@ -143,6 +157,29 @@ router.post("/logout", auth, async (req, res) => {
   } catch (err) {
     console.error("LOGOUT ERROR:", err);
     return res.status(500).json({ error: "Logout failed" });
+  }
+});
+
+// GET LOGGED-IN USER
+router.get("/me", auth, async (req, res) => {
+  try {
+    const { userId } = req.user;
+
+    const [rows] = await mysql.query(
+      "SELECT id, userName, email, role FROM users WHERE id = ?",
+      [userId]
+    );
+
+    if (!rows.length) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({
+      user: rows[0],
+    });
+  } catch (err) {
+    console.error("ME ERROR:", err);
+    res.status(500).json({ error: "Server error" });
   }
 });
 

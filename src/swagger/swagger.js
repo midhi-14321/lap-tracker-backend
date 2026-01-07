@@ -1655,8 +1655,8 @@ const swaggerDocument = {
         },
       },
     },
-    // Add these to your swagger.js file's paths section:
 
+    // ALl sessions
     "/api/user/sessions": {
       get: {
         tags: ["Sessions"],
@@ -1782,6 +1782,7 @@ const swaggerDocument = {
       },
     },
 
+    // ALL LAPS
     "/api/laps/user": {
       get: {
         tags: ["Laps"],
@@ -1891,6 +1892,7 @@ const swaggerDocument = {
       },
     },
 
+    // USER STATS
     "/api/user/stats": {
       get: {
         tags: ["Users"],

@@ -3,6 +3,7 @@ const mysql = require("../database/db");
 const auth = require("../middleware/auth");
 const router = express.Router();
 
+//DELETE SESSION
 router.delete("/session/delete/:sessionId", auth, async (req, res) => {
   try {
     const { sessionId } = req.params;
@@ -75,7 +76,6 @@ router.delete("/lap/delete/:lapId", auth, async (req, res) => {
     res.status(500).json({ error: "Server error while deleting lap" });
   }
 });
-
 
 
 // delete all sessions of logged-in user

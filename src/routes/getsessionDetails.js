@@ -113,7 +113,6 @@ router.get("/session/:id/laps", auth, async (req, res) => {
 });
 
 // laps of a loged in user with pagenation
-
 router.get("/laps/user", auth, async (req, res) => {
   try {
     const userName = req.user.userName;

@@ -62,22 +62,46 @@ router.get("/session/date", auth, async (req, res) => {
 });
 
 // 4️ sort by fastest session avg duration
+// router.get("/session/fastest", auth, async (req, res) => {
+//   // join all laps and count laps , calculate avg lap duration , sort sessions by fastest avarage lap time
+//   try {
+//     const [rows] = await mysql.query(`
+//       SELECT s.id, s.userName, s.startTime, s.endTime, s.duration,
+//              COUNT(l.lapId) AS totalLaps,
+//              AVG(l.duration) AS avgLap
+//       FROM session s
+//       LEFT JOIN lap l ON s.id = l.sessionId
+//       GROUP BY s.id, s.userName, s.startTime, s.endTime, s.duration
+//       ORDER BY avgLap ASC
+//     `);
+
+//     res.json(rows);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: "Server error" });
+//   }
+// });
+
 router.get("/session/fastest", auth, async (req, res) => {
-  // join all laps and count laps , calculate avg lap duration , sort sessions by fastest avarage lap time
   try {
     const [rows] = await mysql.query(`
-      SELECT s.id, s.userName, s.startTime, s.endTime, s.duration,
-             COUNT(l.lapId) AS totalLaps,
-             AVG(l.duration) AS avgLap
+      SELECT 
+        s.id,
+        s.userName,
+        s.startTime,
+        s.endTime,
+        s.duration,
+        COUNT(l.lapId) AS totalLaps,
+        IFNULL(AVG(CAST(l.duration AS UNSIGNED)), 0) AS avgLap
       FROM session s
       LEFT JOIN lap l ON s.id = l.sessionId
-      GROUP BY s.id, s.userName, s.startTime, s.endTime, s.duration
+      GROUP BY s.id
       ORDER BY avgLap ASC
     `);
 
     res.json(rows);
   } catch (err) {
-    console.error(err);
+    console.error("FASTEST SESSION ERROR:", err);
     res.status(500).json({ error: "Server error" });
   }
 });

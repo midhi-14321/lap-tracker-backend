@@ -9,6 +9,18 @@ const isAdmin = require("../middleware/admin-only");
 
 const JWT_SECRET = "racinglap";
 
+// REGISTER 
+/**
+ * POST /api/auth/register
+ * Register a new user
+ * 
+ * Body: {
+ *   "userName": "john_doe",
+ *   "email": "john@example.com",
+ *   "password": "password123"
+ * }
+ */
+
 // REGISTER
 router.post("/register", async (req, res) => {
   try {
@@ -66,6 +78,18 @@ router.post("/register", async (req, res) => {
     res.status(500).json({ error: "Register failed" });
   }
 });
+
+
+// LOGIN 
+/**
+ * POST /api/auth/login
+ * Login user
+ * 
+ * Body: {
+ *   "email": "john@example.com",
+ *   "password": "password123"
+ * }
+ */
 
 // LOGIN
 router.post("/login", async (req, res) => {
@@ -129,8 +153,12 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// LOGOUT 
+/**
+ * POST /api/auth/logout
+ * Logout user (requires authentication)
+ */
 //LOGOUT
-
 router.post("/logout", auth, async (req, res) => {
   try {
     const userName = req.user.userName;
@@ -159,6 +187,13 @@ router.post("/logout", auth, async (req, res) => {
     return res.status(500).json({ error: "Logout failed" });
   }
 });
+
+
+// GET CURRENT USER 
+/**
+ * GET /api/auth/me
+ * Get logged-in user details (requires authentication)
+ */
 
 // GET LOGGED-IN USER
 router.get("/me", auth, async (req, res) => {

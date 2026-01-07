@@ -534,8 +534,6 @@ const swaggerDocument = {
 
     // USER DASHBOARD
 
-    // Add this to your swagger.js file's paths section:
-
     "/api/session/start": {
       post: {
         tags: ["Sessions"],

@@ -9,11 +9,11 @@ const isAdmin = require("../middleware/admin-only");
 
 const JWT_SECRET = "racinglap";
 
-// REGISTER 
+// REGISTER
 /**
  * POST /api/auth/register
  * Register a new user
- * 
+ *
  * Body: {
  *   "userName": "john_doe",
  *   "email": "john@example.com",
@@ -40,7 +40,8 @@ router.post("/register", async (req, res) => {
     }
 
     //  Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.com$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ error: "Invalid email format" });
     }
@@ -79,12 +80,11 @@ router.post("/register", async (req, res) => {
   }
 });
 
-
-// LOGIN 
+// LOGIN
 /**
  * POST /api/auth/login
  * Login user
- * 
+ *
  * Body: {
  *   "email": "john@example.com",
  *   "password": "password123"
@@ -153,7 +153,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// LOGOUT 
+// LOGOUT
 /**
  * POST /api/auth/logout
  * Logout user (requires authentication)
@@ -188,8 +188,7 @@ router.post("/logout", auth, async (req, res) => {
   }
 });
 
-
-// GET CURRENT USER 
+// GET CURRENT USER
 /**
  * GET /api/auth/me
  * Get logged-in user details (requires authentication)

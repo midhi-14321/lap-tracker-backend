@@ -1,3 +1,4 @@
+require("dotenv").config();
 const jwt = require("jsonwebtoken");
 
 module.exports = (req, res, next) => {
@@ -6,7 +7,7 @@ module.exports = (req, res, next) => {
   if (!token) return res.status(401).json({ error: "Loggin required " });
 
   try {
-    const decoded = jwt.verify(token, "racinglap");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
     next();
   } catch {

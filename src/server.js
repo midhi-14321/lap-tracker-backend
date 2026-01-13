@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express"); // importing express module from node modules and returns a express function , use to create server/applications
 const cors = require("cors"); // to prevent CORS blocking by browser
 const cookieParser = require("cookie-parser"); // allow cookies
@@ -16,7 +17,7 @@ const userFilters = require("./routes/userFilters");
 const authRoutes = require("./routes/authRoutes");
 const deleteRoutes = require("./routes/deleteRoutes");
 const adminOnly = require("./routes/admin");
-// app.use("/api/session", require("./routes/sessionRoutes")); // mounting all routes inside sesionRoutes(BASE_URL+path)
+const PORT = process.env.MYSQLPORT || 8000;
 
 app.get("/", (req, res) => {
   res.send("Lap tracker Api is running..");
@@ -29,8 +30,8 @@ app.use("/api/session", sessionRoutes);
 app.use("/api/admin", adminOnly);
 
 setupSwagger(app);
-app.listen(2000, () => {
+app.listen(PORT, () => {
   // start server
   // tells to the express app to listen for incoming requests and server is running on the 2000 port number
-  console.log("server is running on the 2000 port ");
+  console.log(`server is running on the ${PORT}`);
 });

@@ -1,9 +1,10 @@
-require("dotenv").config();
+const dotenv = require("dotenv");
+
 const express = require("express"); // importing express module from node modules and returns a express function , use to create server/applications
 const cors = require("cors"); // to prevent CORS blocking by browser
 const cookieParser = require("cookie-parser"); // allow cookies
 const app = express(); // creating express application instance
-
+dotenv.config();
 const setupSwagger = require("./swagger/swagger");
 app.use(express.json()); //  express by default doesn't understand raw incoming JSON data from client or frontend , so this middleware parse the JSON to js object and put inside the req.body /;
 app.use(cookieParser()); //

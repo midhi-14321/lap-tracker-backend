@@ -7,7 +7,7 @@ const mysql = require("../database/db");
 const auth = require("../middleware/auth");
 const isAdmin = require("../middleware/admin-only");
 
-const JWT_SECRET = "racinglap";
+
 
 // REGISTER
 /**
@@ -126,7 +126,7 @@ router.post("/login", async (req, res) => {
         email,
         role: rows[0].role,
       },
-      JWT_SECRET
+      process.env.JWT_SECRET
     );
 
     res.cookie("token", token, {

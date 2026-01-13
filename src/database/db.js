@@ -1,4 +1,5 @@
-require("dotenv").config();
+const dotenv=require("dotenv");
+dotenv.config();
 const mysql = require("mysql2/promise"); // this loads mysql2/promise library with async/await support
 const db = mysql.createPool({
   // creating a group of reusable connection pool

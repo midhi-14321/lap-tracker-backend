@@ -1,11 +1,12 @@
 {
-  "name": "lap-tracker-backend",
+  "name": "racing-tracker-backend",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "build": "nodemon src/server.js build"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +15,7 @@
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.15.3",

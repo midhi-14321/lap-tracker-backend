@@ -131,8 +131,8 @@ router.post("/login", async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true, // cookies cannot be accessed by js(browser) - protecting from XSS attacks
-      secure: false, // cookie will be sent on HTTP or HTTPS
-      sameSite: "lax", // cookies will not be send to the server when coming from different server
+      secure: true, // cookie will be sent on HTTP or HTTPS
+      sameSite: "none", // cookies will not be send to the server when coming from different server
       // maxAge: 24 * 60 * 60 * 1000,
     });
     return res.json({

@@ -10,7 +10,7 @@ app.use(express.json()); //  express by default doesn't understand raw incoming 
 app.use(cookieParser()); //
 // app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(
-  cors({ origin: "http://lap-tracker-web.vercel.app", credentials: true })
+  cors({ origin: "https://lap-tracker-web.vercel.app", credentials: true })
 );
 
 // Import session routes

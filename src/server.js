@@ -7,7 +7,7 @@ const app = express(); // creating express application instance
 dotenv.config();
 const setupSwagger = require("./swagger/swagger");
 app.use(express.json()); //  express by default doesn't understand raw incoming JSON data from client or frontend , so this middleware parse the JSON to js object and put inside the req.body /;
-app.use(cookieParser()); //
+app.use(cookieParser()); 
 // app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(
   cors({ origin: "https://lap-tracker-web.vercel.app", credentials: true })
